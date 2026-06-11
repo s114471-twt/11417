@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>打地鼠－黑冠麻鷺飛奔 Ver.</title>
+
+<style>
+
+#rules{
+    width:70%;
+    text-align:center;
+
+    font-size:20px;
+    line-height:1.8;
+
+    color:#5d4037;
+
+    background:rgba(255,255,255,0.5);
+
+    border:3px solid #d98f4e;
+
+    border-radius:15px;
+
+    padding:15px;
+
+    margin-bottom:25px;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    background:#f4c67a;
+    font-family:"Microsoft JhengHei",sans-serif;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+}
+
+.floatScore{
+    position:absolute;
+    font-size:28px;
+    font-weight:bold;
+    color:#ffeb3b;
+    text-shadow:2px 2px 0 #000;
+    pointer-events:none;
+    z-index:9999;
+    animation: floatUp 0.8s ease-out forwards;
+}
+
+@keyframes floatUp{
+    0%{
+        transform:translateY(0) scale(1);
+        opacity:1;
+    }
+    100%{
+        transform:translateY(-80px) scale(1.3);
+        opacity:0;
+    }
+}
+
+/* =========================
+   遊戲容器
+========================= */
+
+#gameContainer{
+
+    width:1200px;
+    height:720px;
+
+    border:8px solid #4e342e;
+    border-radius:20px;
+
+    overflow:hidden;
+    position:relative;
+
+    background:white;
+}
+
+/* =========================
+   開始畫面
+========================= */
+
+#startScreen{
+
+    position:absolute;
+    inset:0;
+
+    background:#f9e3b0;
+
+    display:flex;
+    flex-direction:column;
+
+    justify-content:center;
+    align-items:center;
+
+    z-index:9999;
+}
+
+#startTitle{
+
+    font-size:60px;
+    font-weight:bold;
+    color:#5d4037;
+
+    margin-bottom:20px;
+}
+
+#story{
+
+    width:70%;
+    text-align:center;
+
+    font-size:22px;
+    line-height:1.8;
+
+    color:#444;
+
+    margin-bottom:35px;
+}
+
+#startBtn{
+
+    font-size:40px;
+
+    padding:20px 60px;
+
+    border:none;
+
+    border-radius:20px;
+
+    background:#ff7043;
+
+    color:white;
+
+    cursor:pointer;
+}
+
+/* =========================
+   上方資訊列
+========================= */
+
+#topBar{
+    height:90px;
+    background:#124559;
+
+    position:relative; 
+}
+
+/* 星星 */
+
+#badgeArea{
+    position:absolute;
+    left:20px;
+    top:50%;
+    width:300px;
+    display:flex;
+    transform:translateY(-50%);
+
+  flex-direction:row;   
+    justify-content:flex-start;
+}
+.badge{
+
+    width:32px;
+    height:32px;
+
+    background:gold;
+
+    clip-path: polygon(
+    50% 0%,
+    61% 35%,
+    98% 35%,
+    68% 57%,
+    79% 91%,
+    50% 70%,
+    21% 91%,
+    32% 57%,
+    2% 35%,
+    39% 35%);
+}
+
+/* 計時 */
+
+#timer{
+    font-size:72px;
+    font-weight:900;
+    color:white;
+    -webkit-text-stroke:4px #F9E3B0;
+
+    position:absolute;
+    left:50%;
+    transform:translateX(-50%);
+}
+
+#score{
+    margin-left:auto; 
+    color:white;
+
+    font-size:40px;
+    position:absolute;
+    right:25px;
+    top:50%;
+    transform:translateY(-50%);
+
+    font-weight:bold;
+}
+/* =========================
+   遊戲區
+========================= */
+
+#gameArea{
+
+    position:relative;
+
+    width:100%;
+    height:620px;
+
+    overflow:hidden;
+}
+
+/* 天空 */
+
+#sky{
+
+    position:absolute;
+    top:0;
+
+    width:100%;
+    height:60%;
+
+    background:#f9e3b0;
+}
+
+/* 草地 */
+
+#ground{
+
+    position:absolute;
+    bottom:0;
+
+    width:100%;
+    height:40%;
+
+    background:#7cb342;
+}
+
+
+
+/* =========================
+   鳥
+========================= */
+
+.bird{
+
+    position:absolute;
+
+    cursor:pointer;
+
+    user-select:none;
+}
+
+.bird img{
+
+    width:175px;
+    height:125px;
+
+    pointer-events:none;
+}
+
+/* ========================= */
+
+#restart{
+
+    position:absolute;
+
+    left:20px;
+    bottom:20px;
+
+    z-index:500;
+
+    padding:10px 18px;
+
+    border:none;
+
+    border-radius:10px;
+
+    font-size:20px;
+
+    background:#B9314F;
+
+    color:white;
+
+    cursor:pointer;
+}
+
+#endMessage{
+
+    position:absolute;
+
+    top:50%;
+    left:50%;
+
+    transform:translate(-50%,-50%);
+
+    color:white;
+
+    font-size:60px;
+
+    font-weight:bold;
+
+    text-shadow:4px 4px black;
+
+    display:none;
+
+    z-index:999;
+}
+
+</style>
+</head>
+<body>
+
+<div id="gameContainer">
+
+<div id="startScreen">
+
+<h1 id="startTitle">黑冠麻鷺大量出沒！</h1>
+
+<div id="story">
+近年來，黑冠麻鷺常出現在公園、校園及都市街道，
+經常被戲稱為「大笨鳥、地瓜」。
+
+某天，一群黑冠麻鷺突然在城市中暴走，到處亂跑！
+
+玩家必須在時間內快速點擊衝出來的黑冠麻鷺，
+阻止牠們佔領城市。
+
+</div>
+
+<div id="rules">
+普通黑冠麻鷺 +10分<br>
+小小黑冠麻鷺 +20分<br>
+暴走黑冠麻鷺 +30分
+</div>
+
+<button id="startBtn">START</button>
+
+</div>
+
+<div id="topBar">
+
+<div id="badgeArea"></div>
+
+<div id="timer">60</div>
+
+<div id="score">0</div>
+
+</div>
+
+<div id="gameArea">
+
+<div id="sky"></div>
+<div id="ground"></div>
+
+<button id="restart">Restart</button>
+
+<div id="endMessage">遊戲結束</div>
+
+</div>
+
+</div>
+
+<script>
+
+const gameArea=document.getElementById("gameArea");
+const scoreText=document.getElementById("score");
+const timerText=document.getElementById("timer");
+const badgeArea=document.getElementById("badgeArea");
+
+let birds=[];
+let score=0;
+let time=60;
+let running=false;
+
+function showScoreEffect(x, y, value){
+
+    const el = document.createElement("div");
+
+    el.className = "floatScore";
+    el.innerText = "+" + value;
+
+    el.style.left = x + "px";
+    el.style.top = y + "px";
+
+    gameArea.appendChild(el);
+
+    setTimeout(()=>{
+        el.remove();
+    },800);
+}
+
+/* =====================
+   星星
+===================== */
+
+function updateBadges(){
+
+badgeArea.innerHTML="";
+
+let count=Math.floor(score/200);
+
+for(let i=0;i<count;i++){
+
+let badge=document.createElement("div");
+badge.className="badge";
+badgeArea.appendChild(badge);
+
+}
+}
+
+/* =====================
+   生成鳥
+===================== */
+
+function spawnBird(){
+
+
+if(!running)return;
+
+let r=Math.random();
+
+let bird=document.createElement("div");
+bird.className="bird";
+
+let points=10;
+let speed=3;
+let scale=1;
+
+bird.dataset.scale = scale;
+bird.dataset.points=points;
+
+if(r<0.2){
+
+points=20;
+scale=0.5;
+speed=4;
+
+}
+else if(r<0.35){
+
+points=30;
+speed=9;
+
+}
+
+bird.dataset.points=points;
+
+bird.innerHTML=
+`<img src="去背的123.png">`;
+
+let dir=Math.random()<0.5?-1:1;
+
+
+
+let x=Math.random()*950;
+
+let y=250+Math.random()*220;
+
+bird.style.left=x+"px";
+bird.style.top=y+"px";
+
+gameArea.appendChild(bird);
+
+let obj={
+el:bird,
+x:x,
+y:y,
+speed:speed,
+dir:Math.random()<0.5?-1:1,
+alive:true
+};
+
+birds.push(obj);
+
+bird.onclick=()=>hitBird(obj);
+
+setTimeout(()=>{
+
+if(obj.alive){
+
+bird.remove();
+
+birds=birds.filter(b=>b!==obj);
+
+}
+
+},5000);
+}
+
+function hitBird(obj){
+
+if(!obj.alive)return;
+
+obj.alive=false;
+
+let value = Number(obj.el.dataset.points);
+
+score += value;
+scoreText.innerText = score;
+
+updateBadges();
+
+/* ⭐ 特效位置 */
+let rect = obj.el.getBoundingClientRect();
+let areaRect = gameArea.getBoundingClientRect();
+
+let x = rect.left - areaRect.left + 60;
+let y = rect.top - areaRect.top + 40;
+
+showScoreEffect(x, y, value);
+
+obj.el.innerHTML=
+`<img src="去背的456.png">`;
+
+let fly=setInterval(()=>{
+
+obj.x-=15;
+obj.y-=15;
+
+obj.el.style.left=obj.x+"px";
+obj.el.style.top=obj.y+"px";
+
+if(obj.x<-300){
+
+clearInterval(fly);
+obj.el.remove();
+
+}
+
+},16);
+}
+
+function animateBirds(){
+
+ birds.forEach(b=>{
+
+ if(!b.alive)return;
+
+ b.x += b.speed * b.dir;
+
+ // ===== 撞牆轉向 =====
+ if(b.x < 0 || b.x > 1050){
+   b.dir *= -1;
+ }
+
+ // ===== ⭐ 核心：面向移動方向 =====
+ let scale = (b.el.dataset.scale || 1);
+
+ b.el.style.transform =
+   `scale(${scale}) scaleX(${b.dir > 0 ? 1 : -1})`;
+
+ b.el.style.left = b.x + "px";
+
+ });
+
+ requestAnimationFrame(animateBirds);
+}
+
+animateBirds();
+
+/* =====================
+   結束
+===================== */
+
+function endGame(){
+
+running=false;
+
+document.getElementById("endMessage").style.display = "block";
+
+document.getElementById("endMessage").innerHTML = `
+    遊戲結束<br>
+    <div style="font-size:40px;margin-top:10px;">
+        SCORE：${score}
+    </div>
+`;
+
+let star = "";
+
+if(score >= 1200) star = "⭐⭐⭐⭐⭐⭐";
+else if(score >= 1000) star = "⭐⭐⭐⭐⭐";
+else if(score >= 800) star = "⭐⭐⭐⭐";
+else if(score >= 600) star = "⭐⭐⭐";
+else if(score >= 400) star = "⭐⭐";
+else if(score >= 200) star = "⭐";
+else star = " ";
+
+document.getElementById("endMessage").innerHTML = `
+    GAMEOVER<br>
+SCORE：${score}
+    ${star}<br>
+   
+`;
+
+
+birds.forEach(b=>{
+
+if(!b.alive)return;
+
+b.speed=15;
+
+b.dir=Math.random()<0.5?-1:1;
+
+let run=setInterval(()=>{
+
+b.x+=b.speed*b.dir;
+
+b.el.style.left=b.x+"px";
+
+if(b.x<-400||b.x>1500){
+
+clearInterval(run);
+
+b.el.remove();
+
+}
+
+},16);
+
+});
+}
+
+/* =====================
+   開始
+===================== */
+
+let timer;
+
+function startGame(){
+
+birds.forEach(b=>b.el.remove());
+
+birds=[];
+
+score=0;
+time=60;
+
+scoreText.innerText=0;
+timerText.innerText=60;
+
+updateBadges();
+
+document.getElementById("endMessage")
+.style.display="none";
+
+running=true;
+
+clearInterval(timer);
+
+timer=setInterval(()=>{
+
+time--;
+
+timerText.innerText=time;
+
+if(time<=0){
+
+clearInterval(timer);
+
+endGame();
+
+}
+
+},1000);
+}
+
+setInterval(spawnBird,700);
+
+document
+.getElementById("startBtn")
+.onclick=()=>{
+
+document
+.getElementById("startScreen")
+.style.display="none";
+
+startGame();
+};
+
+document
+.getElementById("restart")
+.onclick=startGame;
+
+</script>
+
+</body>
+</html>
